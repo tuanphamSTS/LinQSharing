@@ -61,7 +61,11 @@ namespace ClientServerEvaluation
             // In-memory query
             IEnumerable<Student> inmemoryQuery = query.AsEnumerable().Skip(2).Take(1);
 
+            // All the query is handled by IQueryable
             var serverResult = serverQuery.ToArray();
+            // Handled by IQueryable: .Where(), .Orderby()
+            // Converted to enumerable object
+            // Handled by LinQ in-memory: .Skip(), .Take()
             var inmemoryResult = inmemoryQuery.ToArray();
         }
 
