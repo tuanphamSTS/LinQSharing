@@ -7,8 +7,10 @@ namespace ClientServerEvaluation
     {
         static void Main(string[] args)
         {
-            MyMethods.TopLevelProjection();
+            //MyMethods.TopLevelProjection();
             //MyMethods.UnsupportedClientEvaluation();
+            //MyMethods.ExplicitClientEvaluation();
+            MyMethods.InmemoryProcess();
         }
     }
 }

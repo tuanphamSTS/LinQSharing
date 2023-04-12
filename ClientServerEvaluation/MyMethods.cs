@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +13,8 @@ namespace ClientServerEvaluation
         public static void TopLevelProjection()
         {
             SchoolDbContext db = new SchoolDbContext();
-            var blogs = db.Students
+            // Not throwing runtime exception
+            var students = db.Students
             .OrderByDescending(s => s.FirstName)
             .Select(
                 s => new { Name = (StandardizeName(s.FirstName)) })
@@ -22,11 +24,45 @@ namespace ClientServerEvaluation
         public static void UnsupportedClientEvaluation()
         {
             SchoolDbContext db = new SchoolDbContext();
-            var blogs = db.Students
+            // Throwing runtime exception
+            var students = db.Students
             .OrderByDescending(s => StandardizeName(s.FirstName))
             .Select(
                 s => new { Name = s.FirstName })
             .ToList();
+        }
+
+        public static void ExplicitClientEvaluation()
+        {
+            SchoolDbContext db = new SchoolDbContext();
+            // Convert to IEnumerable
+            var query = db.Students.AsEnumerable();
+
+            // Query is processed by LinQ in-memory operators
+            var students = query
+            .OrderByDescending(s => StandardizeName(s.FirstName))
+            .Select(
+                s => new { Name = s.FirstName })
+            .ToList();
+
+            foreach (var student in students)
+            {
+                Console.WriteLine(student.Name);
+            }
+        }
+
+        public static void InmemoryProcess()
+        {
+            SchoolDbContext db = new SchoolDbContext();
+            IQueryable<Student> query = db.Students.Where(s => s.Grade == 1).OrderBy(s => s.FirstName);
+
+            // Server query
+            IQueryable<Student> serverQuery = query.Skip(2).Take(1);
+            // In-memory query
+            IEnumerable<Student> inmemoryQuery = query.AsEnumerable().Skip(2).Take(1);
+
+            var serverResult = serverQuery.ToArray();
+            var inmemoryResult = inmemoryQuery.ToArray();
         }
 
         private static string StandardizeName(string name)
